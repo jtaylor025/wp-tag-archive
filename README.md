@@ -11,4 +11,4 @@ The function 'tagstoc()' will generate a table of contents that servers as a qui
 
 The function 'tagsalpha()' will output the actual list of all the tags in alphabetical order, grouped by letter/number.
 
-You can see the first instance of this being used on the Commonwealth Round Table website http://www.commonwealthroundtable.co.uk
+You can see the first instance of this being used on the Commonwealth Round Table website http://www.commonwealthroundtable.co.uk/topics
