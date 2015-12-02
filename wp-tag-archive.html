@@ -1,0 +1,101 @@
+<?php
+/*
+Author: James Taylor
+URL: http://github.com/jtaylor025
+
+So, at the moment, this is just a bunch of code that you can drop into your Wordpress functions.php file and then use to generate tag archive lists on pages in your site. I'm working towards making this a plugin.
+
+There are three functions here that you can call through standard php calls on your wordpress templates. e.g. '<?php tagstoc(); ?>'
+
+The function 'tagstats()' is used to count and print all the tags.
+
+The function 'tagstoc()' will generate a table of contents that servers as a quick link tool for the page, and when paired with the full list will provide anchor links to each section.
+
+The function 'tagsalpha()' will output the actual list of all the tags in alphabetical order, grouped by letter/number.
+
+You can see the first instance of this being used on the Commonwealth Round Table website http://www.commonwealthroundtable.co.uk
+
+*/
+
+
+
+// copy from here down ....
+
+/********** TAG ARCHIVE *************/
+
+// Tag stats for tag archive page
+// total number of tags
+function tagstats() {
+    $numtags = wp_count_terms('post_tag');
+    if (0 < $numtags) $numtags = number_format($numtags);
+    echo $numtags . '';
+}
+
+// Print alphabetical list of links to sections on tag archive page
+function tagstoc () {
+    $tags = get_tags(); // get the tags
+    $html = '<p>Go to section:</p><ul class="tagtoc">';
+    $tagnames = array();
+
+    $first_letter = strtoupper( substr($tags[0]->name[0], 0, 1) ); 
+    $html .= "<li><a href='#" . $first_letter . "'>" . $first_letter . "</a></li>";
+    
+    foreach ($tags as $tag) {
+        if( strtoupper($tag->name[0]) != $first_letter ) {  
+            $first_letter = strtoupper( substr($tag->name[0], 0, 1) ); 
+            $html .= "<li><a href='#" . $first_letter . "'>" . $first_letter . "</a></li>";
+        }
+    }
+
+    $html .= "</ul>";
+    echo $html;
+}
+
+// Print an alphabetical list of all tags on tag archive page
+function tagsalpha () {
+    // set some useful variables
+    $tags = get_tags(); // get the tags
+    $html = '<div class="taggroupsl">';
+    $tagnames = array();
+    $count = 0;
+    $first = true;
+    $half = round(wp_count_terms('post_tag')/2) - 1;
+    
+    // not sure i need this loop. Might be able to directly reference the first tags->name ...
+    foreach ($tags as $tag) {
+        $tagnames[] = $tag->name;
+    }
+
+    // Find the starting letter and echo to screen before starting the loop
+    $current_letter = strtoupper( substr($tagnames[0], 0, 1) );     //Grab the starting letter
+    $html .= "<div class='taggroup'><h3><a name='" . $current_letter . "'></a>" . $current_letter . PHP_EOL . "</h3><ul>";
+
+    // loop through all the tags, output the letter headings and list the tags
+    foreach($tags as $tag) {
+        $tag_link = get_tag_link( $tag->term_id );                     //Loop through our array
+        if( strtoupper($tag->name[0]) != $current_letter ) {           //If the first letter doesn't match the title
+            //if we've reached half the list, close the parent div and open a new one to float right to appear like a second column
+            if ($count >= $half && $first) {  
+                    $html .= "</ul></div></div>";
+                    $html .= "<!-- half here --><div class='taggroupsr'>";
+                    $first = false;
+                } else {
+                    $html .= "</ul></div>";
+                }
+            $current_letter = strtoupper($tag->name[0]);               //Overwrite the title letter
+            $html .= "<div class='taggroup'><h3><a name='" . $current_letter . "'></a>" . PHP_EOL . strtoupper($current_letter) . PHP_EOL . "</h3><ul>";   //Echo the title letter
+        }
+        $html .= "<li><a href='{$tag_link}' title='{$tag->name} topic'>{$tag->name}</a></li>"; //Echo the word
+        $count++;
+    }
+
+    // close of the html code and print to screen
+    $html .= "</ul></div></div>";
+    echo $html;
+}
+
+
+// stop copying. Now paste to functions.php file and feel smug
+
+/* The fate of the world relies on this closing end tag */
+ ?>
